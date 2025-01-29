@@ -1,0 +1,126 @@
+.navbar{
+    background-color: #1a2d5c; /* Dark blue */
+}
+
+.navbar .nav-link {
+    color: #f6eee0 !important;
+}
+
+.navbar .nav-link:hover {
+    color: #f6eee0 !important;
+}
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba(255, 255, 255, 1)' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E"); 
+    /* Change icon color to white */
+}
+
+/* Button Customization */
+    .btn-darkblue {
+        background-color: #1a2d5c;
+        color: #f6eee0;
+        border: none;
+    }
+
+    .btn-darkblue:hover {
+        background-color: #243d75;
+        color: #f6eee0;
+    }
+
+/* Category Buttons */
+.btn-category {
+    background-color: #e0e0e0;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 8px 20px;
+}
+
+.btn-category:hover {
+    background-color: #d4d4d4;
+}
+
+/* Login Form Section */
+.login-form {
+    background-color: #f6eee0;
+    padding: 30px 15px;
+    text-align: center;
+    border-radius: 0 0 10px 10px;
+}
+
+.login-form .form-label {
+    font-size: 14px;
+    color: #555;
+    font-weight: bold;
+    text-align: left; /* Ensure text alignment is to the left */
+    display: block;   /* Make the label take full width */
+    margin-bottom: 5px;
+}
+
+.login-form .btn-primary {
+    width: auto; /* Button width will now adjust to the content */
+    padding: 10px 20px; /* Optional: Adjust padding for a better look */
+    font-size: 16px; /* Adjust font size if necessary */
+    display: block; /* Center button below the inputs */
+    margin: 0 auto; /* Horizontally center the button */
+    background-color: #001f54;
+    border: none;
+}
+
+.login-form .btn-primary:hover {
+    background-color: #00296b;
+}
+
+/* Sticky Footer */
+.container {
+    flex: 1; /* Pushes the footer to the bottom */
+}
+
+.footer {
+    background-color: #1a2d5c; /* Dark blue to match the theme */
+    color: #f6eee0;
+    padding: 10px 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Cards in Home page*/
+    
+.masonry-layout {
+    column-count: 4;
+    column-gap: 8px;
+}
+.masonry-item {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 8px;
+    break-inside: avoid;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.masonry-item img {
+    width: 100%;
+    border-radius: 5px;
+}
+
+.masonry-item:hover {
+    transform: translateY(-5px);
+}
+
+@media (max-width: 768px) {
+    .masonry-layout {
+        column-count: 2;
+    }
+}
+@media (max-width: 480px) {
+    .masonry-layout {
+        column-count: 1;
+    }
+}
+
+
+
+

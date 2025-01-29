@@ -29,18 +29,18 @@
     <!-- Search Section -->
     <div class="container mt-4">
         <div class="input-group mb-3">
-            <input type="text" class="form-control me" placeholder="Search for items..." aria-label="Search">
-            <button class="btn btn-darkblue">Search</button>
+            <input type="text" id="searchInput" class="form-control me" placeholder="Search for items..." aria-label="Search">
+            <button class="btn btn-darkblue" onclick="filterListings()">Search</button>
         </div>
 
         <!-- Categories -->
         <h4 class="text-center mb-3">Explore By Category</h4>
         <div class="d-flex justify-content-center flex-wrap gap-3">
-            <button class="btn btn-category">Electronics</button>
-            <button class="btn btn-category">Home & Garden</button>
-            <button class="btn btn-category">Fashion</button>
-            <button class="btn btn-category">Vehicles</button>
-            <button class="btn btn-category">Books</button>
+            <button class="btn btn-category"  onclick="filterByCategory('Electronics')">Electronics</button>
+            <button class="btn btn-category" onclick="filterByCategory('Home & Garden')">Home & Garden</button>
+            <button class="btn btn-category" onclick="filterByCategory('Fashion')">Fashion</button>
+            <button class="btn btn-category" onclick="filterByCategory('Vehicles')">Vehicles</button>
+            <button class="btn btn-category" onclick="filterByCategory('Books')">Books</button>
         </div>
 
         <!-- Feature Listings -->
@@ -50,58 +50,59 @@
                 <!-- JavaScript will populate this section -->
             </div>
         </div>
-        </div>
-        <!--SignUp Pop Up-->
-        <div id="popupForm" class="popup-form">
-            <div class="popup-content">
-                <span onclick="closePopup('popupForm')" class="close-button">&times;</span>
-                <h2>Sign Up</h2>
-                <form id="signup-form">
-                    <label for="signup-name">Full Name</label>
-                    <input type="text" id="signup-name" placeholder="Enter your full name" required>
-                    
-                    <label for="signup-email">Email Address</label>
-                    <input type="email" id="signup-email" placeholder="Enter your email" required>
-                    
-                    <label for="signup-password">Password</label>
-                    <input type="password" id="signup-password" placeholder="Enter a secure password" required>
-                    
-                    <label for="signup-confirm-password">Confirm Password</label>
-                    <input type="password" id="signup-confirm-password" placeholder="Confirm your password" required>
-                    
-                    <button type="submit" class="submit-button">Sign Up</button>
-                </form>
-                <p>Already have an account? <a href="#" onclick="openLoginPopup()">Login</a></p>
-            </div>
-        </div>
-        <!--Login Pop Up-->
-        <div id="loginForm" class="popup-form">
-            <div class="popup-content">
-                <span onclick="closePopup('loginForm')" class="close-button">&times;</span>
-                <h2>Login</h2>
-                <form id="login-form">
-                    <!-- Email Input -->
-                    <label for="login-email" class="form-label">Email Address</label>
-                    <input type="email" id="login-email" placeholder="Enter your email" required>
-        
-                    <!-- Password Input -->
-                    <label for="login-password" class="form-label">Password</label>
-                    <input type="password" id="login-password" placeholder="Enter your password" required>
-        
-                    <!-- Submit Button -->
-                    <button type="submit" class="submit-button">Login</button>
-                </form>
-        
-                <!-- Sign-Up Link -->
-                <p>Don't have an account? <a href="#" onclick="openSignupPopup()">Sign Up</a></p>
-            </div>
-        </div>
-        
-    </div>    
+    </div>
 
 
-    <!-- Footer -->
-    <div id="footer"></div>
+    <!--SignUp Pop Up-->
+    <div id="popupForm" class="popup-form">
+        <div class="popup-content">
+            <span onclick="closePopup('popupForm')" class="close-button">&times;</span>
+            <h2>Sign Up</h2>
+            <form id="signup-form">
+                <label for="signup-name">Full Name</label>
+                <input type="text" id="signup-name" placeholder="Enter your full name" required>
+                
+                <label for="signup-email">Email Address</label>
+                <input type="email" id="signup-email" placeholder="Enter your email" required>
+                
+                <label for="signup-password">Password</label>
+                <input type="password" id="signup-password" placeholder="Enter a secure password" required>
+                
+                <label for="signup-confirm-password">Confirm Password</label>
+                <input type="password" id="signup-confirm-password" placeholder="Confirm your password" required>
+                
+                <button type="submit" class="submit-button">Sign Up</button>
+            </form>
+            <p>Already have an account? <a href="#" onclick="openLoginPopup()">Login</a></p>
+        </div>
+    </div>
+    <!--Login Pop Up-->
+    <div id="loginForm" class="popup-form">
+        <div class="popup-content">
+            <span onclick="closePopup('loginForm')" class="close-button">&times;</span>
+            <h2>Login</h2>
+            <form id="login-form">
+                <!-- Email Input -->
+                <label for="login-email" class="form-label">Email Address</label>
+                <input type="email" id="login-email" placeholder="Enter your email" required>
+    
+                <!-- Password Input -->
+                <label for="login-password" class="form-label">Password</label>
+                <input type="password" id="login-password" placeholder="Enter your password" required>
+    
+                <!-- Submit Button -->
+                <button type="submit" class="submit-button">Login</button>
+            </form>
+    
+            <!-- Sign-Up Link -->
+            <p>Don't have an account? <a href="#" onclick="openSignupPopup()">Sign Up</a></p>
+        </div>
+    </div>
+        
+    
+
+
+   
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/navbar.js"></script>
