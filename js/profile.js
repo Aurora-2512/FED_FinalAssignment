@@ -1,42 +1,22 @@
 document.addEventListener("DOMContentLoaded", function () {
-    loadUserProfile(); // Load user profile when page loads
-});
-
-/**
- * Function to Log In User and Store in Local Storage
- */
-function loginUser(email, name) {
-    console.log("Logging in user:", name, email);
-    
-    // Store user details in localStorage
-    localStorage.setItem("loggedInUser", JSON.stringify({ email, name }));
-
-    // Update the UI immediately
     loadUserProfile();
-}
+});// Load user profile when page loads
 
-/**
- * Function to Load User Profile from Local Storage
- */
 function loadUserProfile() {
     let userData = localStorage.getItem("loggedInUser");
-    let profileImage = localStorage.getItem("profileImage"); // Load profile image
 
     if (userData) {
         let loggedInUser = JSON.parse(userData);
 
-        // Ensure elements exist before updating them
+        // ✅ Ensure elements exist before updating
         let userNameElement = document.getElementById("userName");
-        let editEmailElement = document.getElementById("editEmail");
-        let profileImageElement = document.getElementById("profileImage");
+        let userEmailElement = document.getElementById("editEmail");
 
-        if (userNameElement) userNameElement.innerText = loggedInUser.name || "Guest";
-        if (editEmailElement) {
-            editEmailElement.value = loggedInUser.email || "No Email Found";
-            editEmailElement.readOnly = true; // Make email field non-editable
+        if (userNameElement) {
+            userNameElement.innerText = loggedInUser.name || "Guest";
         }
-        if (profileImageElement && profileImage) {
-            profileImageElement.src = profileImage;
+        if (userEmailElement) {
+            userEmailElement.value = loggedInUser.email || "No Email Found";
         }
     } else {
         document.getElementById("userName").innerText = "Guest";
@@ -44,10 +24,6 @@ function loadUserProfile() {
     }
 }
 
-
-/**
- * Function to Open Edit Profile Modal
- */
 function openEditModal() {
     var editModal = new bootstrap.Modal(document.getElementById("editProfileModal"));
     editModal.show();
@@ -58,23 +34,24 @@ function openEditModal() {
 /**
  * Function to Update Profile Information and Save to Local Storage
  */
-function updateProfile() {
+
+async function updateProfile() {
     let newName = document.getElementById("editName").value.trim();
+    let email = document.getElementById("editEmail").value.trim();
     let newPassword = document.getElementById("editPassword").value.trim();
     let confirmPassword = document.getElementById("editConfirmPassword").value.trim();
-    let email = document.getElementById("editEmail").value.trim();
 
-    if (!email || !newName || !newPassword || !confirmPassword) {
+    if (!email || !newName) {
         alert("Please fill in all fields!");
         return;
     }
 
-    if (newPassword !== confirmPassword) {
+    if (newPassword && newPassword !== confirmPassword) {
         alert("Passwords do not match!");
         return;
     }
 
-    // Update local storage with new name
+    // ✅ Update local storage
     let userData = JSON.parse(localStorage.getItem("loggedInUser"));
     if (userData) {
         userData.name = newName;
@@ -82,36 +59,47 @@ function updateProfile() {
         loadUserProfile(); // Refresh UI with updated name
     }
 
-    // Update password in RestDB
-    fetch(`https://fedest-f892.restdb.io/rest/signup?q={"email":"${email}"}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "x-apikey": "6793aa081128e046e96abe67"
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
+
+    try {
+        let response = await fetch(`https://fedest-f892.restdb.io/rest/signup?q={"email":"${email}"}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "x-apikey": APIKEY
+            }
+        });
+
+        let data = await response.json();
         if (data.length > 0) {
             let userId = data[0]._id;
 
-            fetch(`https://fedest-f892.restdb.io/rest/signup/${userId}`, {
+            let updateData = { name: newName };
+            if (newPassword) {
+                updateData.password = newPassword; // Add password update only if entered
+                updateData.confirmPassword = newPassword
+            }
+
+            // ✅ Update user profile in RestDB
+            await fetch(`https://fedest-f892.restdb.io/rest/signup/${userId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-apikey": "6793aa081128e046e96abe67"
+                    "x-apikey": APIKEY
                 },
-                body: JSON.stringify({ name: newName, password: newPassword })
-            })
-            .then(() => {
-                alert("Profile updated successfully!");
-                var editModal = bootstrap.Modal.getInstance(document.getElementById("editProfileModal"));
-                editModal.hide();
-            })
-            .catch(error => console.error("Error updating profile:", error));
+                body: JSON.stringify(updateData)
+            });
+
+            alert("Profile updated successfully!");
+            document.getElementById("editProfileModal").querySelector(".btn-close").click();
+        } else {
+            alert("User not found in database.");
         }
-    });
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        alert("Failed to update profile. Please try again.");
+    }
 }
+
 
 /**
  * Function to Open Upload Profile Picture Modal

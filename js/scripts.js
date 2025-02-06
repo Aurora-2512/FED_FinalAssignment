@@ -211,7 +211,8 @@ async function createListing() {
         image: imageUrl,
         category,
         title,
-        price
+        price,
+        createdAt: new Date().toISOString() // Store timestamp
     };
     let storedListings = JSON.parse(localStorage.getItem("newListings")) || [];
     
@@ -274,18 +275,24 @@ function displayProfileListings() {
     profileContainer.innerHTML = ""; // Clear the container before appending
     
     let storedListings = JSON.parse(localStorage.getItem("newListings")) || [];
+    
+    // Filter out listings older than 30 days
+    let now = new Date();
+    storedListings = storedListings.filter(listing => {
+        let listingDate = new Date(listing.createdAt);
+        let diffDays = (now - listingDate) / (1000 * 60 * 60 * 24);
+        return diffDays <= 30;
+    });
 
-    // Limit to 30 listings
-    let listingsToShow = storedListings.slice(0, 30);
+    localStorage.setItem("newListings", JSON.stringify(storedListings));
 
-    listingsToShow.forEach((listing) => {
+    storedListings.forEach((listing) => {
         const item = document.createElement("div");
-        item.className = "listing-box"; // Make sure this matches your CSS
+        item.className = "listing-box";
         item.innerHTML = `
             <div class="profile-listing-card">
                 <img src="${listing.image}" alt="${listing.title}" class="listing-image">
                 <p class="listing-title">${listing.title}</p>
-                
             </div>
         `;
         profileContainer.appendChild(item);

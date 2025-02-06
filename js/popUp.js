@@ -63,7 +63,11 @@ document.addEventListener("DOMContentLoaded", function () {
                             return response.json();
                         })
                         .then(data => {
-                            alert("Sign-up successful! Redirecting to the main page...");
+                            alert("Sign-up successful! ");
+                            localStorage.setItem("loggedInUser", JSON.stringify({
+                                name: name,
+                                email: email
+                            }));
                             window.location.href = "Main.html"; // Redirect to main page
                         })
                         .catch(error => {
@@ -112,6 +116,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     openSignupPopup(); // Show Sign-Up Form
                 } else if (data[0].password === password) {
                     alert("Login successful!");
+
+                    localStorage.setItem("loggedInUser", JSON.stringify({ 
+                        name: data[0].name, 
+                        email: data[0].email 
+                    }));
+
                     window.location.href = "Main.html"; // Redirect to main page
                 } else {
                     alert("Incorrect password. Please try again.");
