@@ -15,6 +15,9 @@ let listings = [
     { id:13,image: "image/bracelet.jpg", category: "Fashion", title: "Vintage Bracelet", price: "250"},
     { id:14,image: "image/hanging_pots.jpg", category: "Home & Garden", title: "Indoor Hanging Pots", price: "35"},
     { id:15,image: "image/airpods.jpg", category: "Electronics", title: "Airpods Pro 2", price: "450"},
+    { id:15,image: "image/airpods.jpg", category: "Electronics", title: "Airpods Pro 2", price: "450"},
+    { id:15,image: "image/airpods.jpg", category: "Electronics", title: "Airpods Pro 2", price: "450"},
+
 ];
 
 
@@ -84,7 +87,9 @@ function filterByCategory(category) {
 async function openProductDetail(productId) {
     console.log(`Fetching product details for ID: ${productId}`);
 
-    const product = listings.find(item => item.id === parseInt(productId));
+    productId = parseInt(productId);
+
+    const product = listings.find(item => item.id === productId);
     if (!product) {
         console.error("Product not found in JavaScript list!");
         return;
@@ -102,7 +107,7 @@ async function openProductDetail(productId) {
         if (!response.ok) throw new Error("Failed to fetch product details");
         const data = await response.json();
 
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
             console.error("No product found with this ID!");
             return;
         }
@@ -110,17 +115,33 @@ async function openProductDetail(productId) {
         const productData = data[0]; // Get first product match
 
         // Fill modal with product details
-        document.getElementById("modalImage").src = product.image;
+        document.getElementById("modalListingId").value = productData.id || "";
+        document.getElementById("sellerEmail").value = productData.email || "";
+        document.getElementById("modalImage").src = product.image || "default.jpg";
         document.getElementById("modalTitle").innerText = productData.title || "N/A";
         document.getElementById("modalCategory").innerText = productData.category || "N/A";
         document.getElementById("modalSize").innerText = productData.size || "N/A";
-        document.getElementById("modalPrice").innerText = `${productData.price || "0.00"}`;
+        document.getElementById("modalPrice").innerText = `$${productData.price || "0.00"}`;
         document.getElementById("modalType").innerText = productData.type || "N/A";
         document.getElementById("modalCondition").innerText = productData.condition || "N/A";
 
-    
-        // Show the modal
-        const modal = new bootstrap.Modal(document.getElementById("productModal"));
+        const chatButton = document.getElementById("chatSeller");
+        chatButton.setAttribute("data-email", productData.email || "");
+        chatButton.onclick = () => startChat(productData.email);
+
+        if (productData.email) {
+            fetchSellerInfo(productData.email);
+        } else {
+            document.getElementById("sellerName").innerText = "Unknown";
+            document.getElementById("sellerContact").innerText = "Not available";
+        }
+
+        // Fetch and Display Reviews
+        fetchReviews(productData.id);
+
+        // **Fix:** Ensure the modal is correctly initialized and opened
+        let modalElement = document.getElementById("productModal");
+        let modal = new bootstrap.Modal(modalElement);
         modal.show();
 
     } catch (error) {
@@ -128,55 +149,295 @@ async function openProductDetail(productId) {
     }
 }
 
+
 //document.getElementById("searchInput").addEventListener("input", filterListings);
 
+async function fetchSellerInfo(sellerEmail) {
+    if (!sellerEmail) {
+        console.warn("No seller email found.");
+        return;
+    }
 
-// Load Listings on Page Load
-document.addEventListener("DOMContentLoaded", () => {
+    try {
+        console.log("Fetching seller info for email:", sellerEmail);
+
+        // Fetch seller info from the signup database using email
+        const response = await fetch(`https://fedest-f892.restdb.io/rest/signup?q={"email":"${sellerEmail}"}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json", "x-apikey": APIKEY }
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch seller info");
+        const data = await response.json();
+
+        if (data.length === 0) {
+            console.warn("Seller not found.");
+            document.getElementById("sellerName").innerText = "Unknown";
+            document.getElementById("sellerContact").innerText = "Not available";
+            return;
+        }
+
+        // Update Seller Info in Modal
+        document.getElementById("sellerName").innerText = data[0].name || "Unknown";
+        document.getElementById("sellerContact").innerText = data[0].email || "Not available";
+
+    } catch (error) {
+        console.error("Error fetching seller info:", error);
+    }
+}
+
+let currentSellerName = "";
+let currentSellerEmail = "";
+
+// 📌 Open Chat Box (with Seller Name)
+async function startChat(sellerEmail) {
+    if (!sellerEmail || sellerEmail === "Not Available") {
+        alert("❌ Seller contact not available.");
+        return;
+    }
+
+    // Fetch seller name from database
+    try {
+        const response = await fetch(`https://fedest-f892.restdb.io/rest/signup?q={"email":"${sellerEmail}"}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json", "x-apikey": APIKEY }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.length > 0) {
+                currentSellerName = data[0].name || sellerEmail;
+            } else {
+                currentSellerName = sellerEmail;
+            }
+        } else {
+            currentSellerName = sellerEmail;
+        }
+    } catch (error) {
+        console.error("❌ Error fetching seller name:", error);
+        currentSellerName = sellerEmail;
+    }
+
+    // Update UI
+    document.getElementById("chatSellerName").innerText = `Chat with ${currentSellerName}`;
+    currentSellerEmail = sellerEmail;
+    loadChatMessages(sellerEmail);
+
+    let chatBox = document.getElementById("chatBoxContainer");
+    chatBox.style.display = "flex"; // Show chat box
+    chatBox.style.zIndex = "4000"; // Ensure it is above the modal
+}
+
+
+// 📌 Close Chat Box
+function closeChat() {
+    document.getElementById("chatBoxContainer").style.display = "none";
+}
+
+// 📌 Send Message
+function sendMessage() {
+    let chatInput = document.getElementById("chatInput");
+    let message = chatInput.value.trim();
+    if (message === "") return;
+
+    let userData = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!userData) {
+        alert("You must be logged in to send messages!");
+        return;
+    }
+
+    let newMessage = {
+        sender: userData.email,
+        senderName: userData.name || "You",
+        receiver: currentSellerEmail,
+        receiverName: currentSellerName,
+        message: message,
+        timestamp: new Date().toISOString()
+    };
+
+    // Store message in LocalStorage (for testing)
+    let chatHistory = JSON.parse(localStorage.getItem(`chat_${currentSellerEmail}`)) || [];
+    chatHistory.push(newMessage);
+    localStorage.setItem(`chat_${currentSellerEmail}`, JSON.stringify(chatHistory));
+
+    displayMessage(newMessage, true);
+    chatInput.value = "";
+}
+
+// 📌 Display Chat Messages
+function displayMessage(messageData, isNew = false) {
+    let chatMessages = document.getElementById("chatMessages");
+    let messageDiv = document.createElement("div");
+
+    let isSender = messageData.sender === JSON.parse(localStorage.getItem("loggedInUser")).email;
+    messageDiv.className = isSender ? "chat-message sender-message" : "chat-message receiver-message";
+
+    messageDiv.innerHTML = `<strong>${isSender ? "You" : messageData.senderName}:</strong> ${messageData.message}`;
     
-    displayListings(listings);
-    displayProfileListings(newListing);
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+
+// 📌 Load Chat History
+function loadChatMessages(sellerEmail) {
+    let chatMessages = document.getElementById("chatMessages");
+    chatMessages.innerHTML = "";
+
+    let chatHistory = JSON.parse(localStorage.getItem(`chat_${sellerEmail}`)) || [];
+    chatHistory.forEach(msg => displayMessage(msg));
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    let chatInput = document.getElementById("chatInput");
+
+if (!chatInput) {
+    console.error("❌ chatInput NOT found!");
+} else {
+    console.log("✅ chatInput found!");
+    chatInput.style.pointerEvents = "auto";
+    chatInput.style.opacity = "1"; // Make sure it's visible
+    chatInput.focus(); // Try to focus it
+}
+
 });
 
 
+async function fetchReviews(listingId) {
+    try {
+        console.log(`📡 Fetching reviews for listing ID: ${listingId}`);
 
-// Fetch seller info if available
-        /*if (data.seller_id) {
-            const sellerResponse = await fetch(`https://fedest-f892.restdb.io/rest/seller/${data.seller_id}`, {
+        // Fetch reviews for the listing
+        const response = await fetch(`https://fedest-f892.restdb.io/rest/reviews?q={"listing_id":"${listingId}"}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json", "x-apikey": APIKEY }
+        });
+
+        if (!response.ok) throw new Error(`Failed to fetch reviews. Status: ${response.status}`);
+
+        const reviews = await response.json();
+        console.log("🔍 Reviews fetched:", reviews); // Debugging line
+
+        const reviewList = document.getElementById("reviewList");
+        reviewList.innerHTML = ""; // Clear previous reviews
+
+        if (reviews.length === 0) {
+            reviewList.innerHTML = "<p>No reviews yet. Be the first to review!</p>";
+            return;
+        }
+
+        // 🔄 Fetch buyer names and display reviews
+        for (const review of reviews) {
+            console.log("Review fetched:", review); // Debugging line
+            const buyerEmail = review.buyer_email;
+
+            // Fetch buyer name from signup database
+            const userResponse = await fetch(`https://fedest-f892.restdb.io/rest/signup?q={"email":"${buyerEmail}"}`, {
                 method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-apikey": APIKEY
-                }
+                headers: { "Content-Type": "application/json", "x-apikey": APIKEY }
             });
 
-            const sellerData = await sellerResponse.json();
-            document.getElementById("modalSeller").innerText = sellerData.name ? `Seller: ${sellerData.name}, Contact: ${sellerData.contact}` : "Seller information not available.";
-        } else {
-            document.getElementById("modalSeller").innerText = "Seller information not available.";
-        }*/
-
-           /* async function loadSellerInfo(sellerId) {
-                try {
-                    const response = await fetch(`https://fedest-f892.restdb.io/rest/signup/${sellerId}`, {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "x-apikey": APIKEY
-                        }
-                    });
-            
-                    if (!response.ok) throw new Error("Failed to fetch seller details");
-                    const sellerData = await response.json();
-            
-                    document.getElementById(`seller_${sellerId}`).innerText = `${sellerData.name}, Contact: ${sellerData.contact}`;
-                } catch (error) {
-                    console.error("Error fetching seller details:", error);
-                    document.getElementById(`seller_${sellerId}`).innerText = "Seller info not available";
+            let buyerName = "Anonymous"; // Default name
+            if (userResponse.ok) {
+                const userData = await userResponse.json();
+                if (userData.length > 0) {
+                    buyerName = userData[0].name || "Anonymous"; // Get name if available
                 }
-            }*/
+            }
 
+            //  Display review with writer’s name
+            const reviewItem = document.createElement("div");
+            reviewItem.className = "review-item";
+            reviewItem.innerHTML = `
+                <p><strong>${buyerName}:</strong> ${review.message}</p>
+                <hr>
+            `;
+            reviewList.appendChild(reviewItem);
+        }
 
+    } catch (error) {
+        console.error(" Error fetching reviews:", error);
+        document.getElementById("reviewList").innerHTML = "<p>Error loading reviews. Try again later.</p>";
+    }
+}
+
+//<p><strong>Seller:</strong> ${review.seller_email}</p>
+
+async function submitReview() {
+    let userData = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!userData) {
+        alert("You must be logged in to leave a review!");
+        return;
+    }
+
+    const listingTitle = document.getElementById("modalTitle").innerText.trim();
+    const reviewText = document.getElementById("reviewText").value.trim();
+
+    if (!reviewText) {
+        alert("Please enter a review!");
+        return;
+    }
+
+    try {
+        // Fetch the listing ID and seller email from the database
+        const listingResponse = await fetch(`https://fedest-f892.restdb.io/rest/listing?q={"title":"${listingTitle}"}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json", "x-apikey": APIKEY }
+        });
+
+        if (!listingResponse.ok) throw new Error(`Failed to fetch listing. Status: ${listingResponse.status}`);
+        const listingData = await listingResponse.json();
+
+        if (listingData.length === 0) {
+            console.error("Error: Listing not found in database.");
+            alert("Error: Listing not found.");
+            return;
+        }
+
+        // Get the correct listing ID and seller email
+        const listingId = listingData[0].id;
+        const sellerEmail = listingData[0].email || "Not Available";
+        const buyerEmail = userData.email;
+
+        console.log("Submitting Review - Listing ID:", listingId, "🛒 Seller Email:", sellerEmail);
+
+        // Construct review object
+        let newReview = {
+            listing_id: listingId,
+            buyer_email: buyerEmail,
+            seller_email: sellerEmail,
+            message: reviewText,
+            createdate: new Date().toISOString()
+        };
+
+        // 📡 Send review to RestDB
+        let reviewResponse = await fetch("https://fedest-f892.restdb.io/rest/reviews", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-apikey": APIKEY
+            },
+            body: JSON.stringify(newReview)
+        });
+
+        if (!reviewResponse.ok) {
+            throw new Error(`Failed to submit review. Status: ${reviewResponse.status}`);
+        }
+
+        let reviewData = await reviewResponse.json();
+        console.log(" Review added successfully:", reviewData);
+
+        alert("Review submitted successfully!");
+
+        // 🔄 Refresh Reviews
+        fetchReviews(listingId);
+        document.getElementById("reviewText").value = ""; // Clear input
+
+    } catch (error) {
+        console.error(" Error submitting review:", error);
+        alert(`Error submitting review: ${error.message}`);
+    }
+}
 
 // Function to Open Create Listing Modal
 function openCreateListingModal() {
@@ -195,14 +456,30 @@ async function createListing() {
     const type = document.getElementById("listingType").value;
     const condition = document.getElementById("listingCondition").value;
     const imageInput = document.getElementById("listingImage").files[0];
-
+    
+    let userData = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!userData) {
+        alert("You must be logged in to create a listing!");
+        return;
+    }
+    let userEmail = userData.email;
     if (!title || !category || !price || !type || !condition || !imageInput) {
         alert("Please fill in all required fields!");
         return;
     }
 
-    let maxId = listings.length > 0 ? Math.max(...listings.map(l => l.id)) : 0;
-    let newId = maxId + 1;
+    //let maxId = listings.length > 0 ? Math.max(...listings.map(l => l.id)) : 0;
+    //let newId = maxId + 1;
+    
+    let response = await fetch("https://fedest-f892.restdb.io/rest/listing", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "x-apikey": APIKEY
+        }
+    });
+    let listingsData = await response.json();
+    let newId = listingsData.length + 1; // Increment based on total count
 
     let imageUrl = URL.createObjectURL(imageInput);
     
@@ -212,18 +489,19 @@ async function createListing() {
         category,
         title,
         price,
-        createdAt: new Date().toISOString() // Store timestamp
+        createdAt: new Date().toISOString(), // Store timestamp
+        email:userEmail
     };
-    let storedListings = JSON.parse(localStorage.getItem("newListings")) || [];
+    let storedListings = JSON.parse(localStorage.getItem(`newListings_${userEmail}`)) || [];
     
     if (storedListings.length >= 30) {
         alert("You have reached the maximum limit of 30 listings!");
         return;
     }
 
-    newListings.push(newListing);
+    storedListings.push(newListing);
     listings.push(newListing);
-    localStorage.setItem("newListings", JSON.stringify(newListings));
+    localStorage.setItem(`newListings_${userEmail}`, JSON.stringify(storedListings));
     displayProfileListings(); // Show in profile
 
     let dbData = {
@@ -237,7 +515,7 @@ async function createListing() {
     };
 
     try {
-        let response = await fetch("https://fedest-f892.restdb.io/rest/listing", {
+        let DBresponse = await fetch("https://fedest-f892.restdb.io/rest/listing", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -247,7 +525,7 @@ async function createListing() {
             body: JSON.stringify(dbData)
         });
 
-        let data = await response.json();
+        let data = await DBresponse.json();
         console.log("Listing saved to database:", data);
         alert("Listing added successfully!");
     } catch (error) {
@@ -271,10 +549,17 @@ async function createListing() {
 }
     
 function displayProfileListings() {
+    let userData = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!userData) {
+        console.warn("No user logged in. Cannot load listings.");
+        return;
+    }
+    let userEmail = userData.email;
+
     const profileContainer = document.getElementById("profileListings"); // Ensure this is your container
     profileContainer.innerHTML = ""; // Clear the container before appending
     
-    let storedListings = JSON.parse(localStorage.getItem("newListings")) || [];
+    let storedListings = JSON.parse(localStorage.getItem(`newListings_${userEmail}`)) || [];
     
     // Filter out listings older than 30 days
     let now = new Date();
@@ -284,7 +569,9 @@ function displayProfileListings() {
         return diffDays <= 30;
     });
 
-    localStorage.setItem("newListings", JSON.stringify(storedListings));
+    storedListings = storedListings.slice(0, 30);
+
+    localStorage.setItem(`newListings_${userEmail}`, JSON.stringify(storedListings));
 
     storedListings.forEach((listing) => {
         const item = document.createElement("div");
@@ -298,9 +585,17 @@ function displayProfileListings() {
         profileContainer.appendChild(item);
     });
 }
+// Load Listings on Page Load
 document.addEventListener("DOMContentLoaded", () => {
+    
+    displayListings(listings);
     displayProfileListings();
 });
+/*document.addEventListener("DOMContentLoaded", () => {
+    displayProfileListings();
+});*/
+
+
 
 
 

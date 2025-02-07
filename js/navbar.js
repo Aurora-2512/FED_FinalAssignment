@@ -24,3 +24,4 @@ document.getElementById("footer").innerHTML = `
             <p>&copy; 2025 MokeSell. All rights reserved.</p>
         </div>
     </footer>`;
+
