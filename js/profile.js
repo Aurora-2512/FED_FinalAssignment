@@ -2,13 +2,14 @@ document.addEventListener("DOMContentLoaded", function () {
     loadUserProfile();
 });// Load user profile when page loads
 
+// Function to Load User Profile from Local Storage
 function loadUserProfile() {
     let userData = localStorage.getItem("loggedInUser");
 
     if (userData) {
         let loggedInUser = JSON.parse(userData);
 
-        //Ensure elements exist before updating
+        // Ensure elements exist before updating them
         let userNameElement = document.getElementById("userName");
         let userEmailElement = document.getElementById("editEmail");
 
@@ -24,6 +25,7 @@ function loadUserProfile() {
     }
 }
 
+// Function to Open Edit Profile Modal and Pre-Fill User Data
 function openEditModal() {
     let userData = JSON.parse(localStorage.getItem("loggedInUser"));
 
@@ -55,21 +57,21 @@ function openEditModal() {
 
 
 
-/**
- * Function to Update Profile Information and Save to Local Storage
- */
-
+//Function to Update Profile Information and Save to Local Storage
+ 
 async function updateProfile() {
     let newName = document.getElementById("editName").value.trim();
     let email = document.getElementById("editEmail").value.trim();
     let newPassword = document.getElementById("editPassword").value.trim();
     let confirmPassword = document.getElementById("editConfirmPassword").value.trim();
 
+    // Validation: Ensure all required fields are filled
     if (!email || !newName ) {
         alert("Please fill in all fields!");
         return;
     }
 
+    // Validation: Check if passwords match
     if (newPassword  !== confirmPassword) {
         alert("Passwords do not match!");
         return;
@@ -85,6 +87,7 @@ async function updateProfile() {
 
 
     try {
+        // Fetch user details from the database
         let response = await fetch(`https://fedest-f892.restdb.io/rest/signup?q={"email":"${email}"}`, {
             method: "GET",
             headers: {
@@ -123,18 +126,15 @@ async function updateProfile() {
     }
 }
 
+//Function to Open Upload Profile Picture Modal
 
-/**
- * Function to Open Upload Profile Picture Modal
- */
 function openUploadProfileModal() {
     var uploadModal = new bootstrap.Modal(document.getElementById("uploadProfileModal"));
     uploadModal.show();
 }
 
-/**
- * Function to Save Uploaded Profile Picture
- */
+//Function to Save Uploaded Profile Picture
+
 function saveProfilePicture() {
     let imageInput = document.getElementById("uploadProfileImage").files[0];
     
@@ -167,16 +167,14 @@ function saveProfilePicture() {
     reader.readAsDataURL(imageInput);
 }
 
-
-/**
- * Function to Log Out the User
- */
+//Function to Log Out the User
 function logoutUser() {
     localStorage.clear();
     alert("You have been logged out!");
     window.location.href = "index.html";
 }
 
+// Function to Confirm Account Deletion
 function confirmDeleteAccount() {
     let confirmation = confirm("Are you sure you want to delete your account? This action cannot be undone!");
     if (confirmation) {
@@ -184,6 +182,7 @@ function confirmDeleteAccount() {
     }
 }
 
+// Function to Delete User Account and Listings from Database
 async function deleteAccount() {
     let userData = JSON.parse(localStorage.getItem("loggedInUser"));
     if (!userData) {
@@ -211,7 +210,7 @@ async function deleteAccount() {
 
         let userId = userDataFromDB[0]._id; // Get the user ID
 
-        // Step 1: Delete the user from RestDB
+        //Delete the user from RestDB
         await fetch(`https://fedest-f892.restdb.io/rest/signup/${userId}`, {
             method: "DELETE",
             headers: {
@@ -220,10 +219,10 @@ async function deleteAccount() {
             }
         });
 
-        // Step 2: Delete all listings by this user
+        //Delete all listings by this user
         await deleteUserListings(userEmail);
 
-        // Step 3: Log out the user and clear their data
+        //Log out the user and clear their data
         logoutUser();
         
         alert("Account deleted successfully. You have been logged out.");
@@ -235,7 +234,7 @@ async function deleteAccount() {
     }
 }
 
-
+// Function to Delete All Listings Created by the User
 async function deleteUserListings(userEmail) {
     try {
         let response = await fetch(`https://fedest-f892.restdb.io/rest/listing?q={"email":"${userEmail}"}`, {
@@ -268,34 +267,3 @@ async function deleteUserListings(userEmail) {
     }
 }
 
-async function deleteUserListings(userEmail) {
-    try {
-        let response = await fetch(`https://fedest-f892.restdb.io/rest/listing?q={"email":"${userEmail}"}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "x-apikey": APIKEY
-            }
-        });
-
-        let userListings = await response.json();
-        
-        // Delete each listing in RestDB
-        for (let listing of userListings) {
-            await fetch(`https://fedest-f892.restdb.io/rest/listing/${listing._id}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-apikey": APIKEY
-                }
-            });
-        }
-
-        // Remove listings from localStorage
-        localStorage.removeItem(`newListings_${userEmail}`);
-
-        console.log("All user listings deleted successfully.");
-    } catch (error) {
-        console.error("Error deleting user listings:", error);
-    }
-}

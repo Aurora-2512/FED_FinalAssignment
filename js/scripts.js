@@ -9,34 +9,23 @@ let listings = [
     { id:7,image: "image/smartphone.jpeg", category: "Electronics", title: "Samsung Galaxy A52", price: "250" },
     { id:8,image: "image/gardening_tool.jpg",category: "Home & Garden", title: "Garden Tools", price: "50" },
     { id:9,image: "image/gray_cargopants.jpg", category: "Fashion", title: "Cargo Pants", price: "50" },
-    { id:10,image: "image/jbl_headphone.jpg", category: "Electornics", title: "JBL Headphones", price: "300" },
+    { id:10,image: "image/jbl_headphone.jpg", category: "Electronics", title: "JBL Headphones", price: "300" },
     { id:11,image: "image/scooter.jpg", category: "Vehicles", title: "Scooter", price: "200" },
     { id:12,image: "image/soil.jpg", category: "Home & Garden", title: "Potting Soil", price: "40"},
     { id:13,image: "image/bracelet.jpg", category: "Fashion", title: "Vintage Bracelet", price: "250"},
     { id:14,image: "image/hanging_pots.jpg", category: "Home & Garden", title: "Indoor Hanging Pots", price: "35"},
     { id:15,image: "image/airpods.jpg", category: "Electronics", title: "Airpods Pro 2", price: "450"},
-    { id:15,image: "image/airpods.jpg", category: "Electronics", title: "Airpods Pro 2", price: "450"},
-    { id:15,image: "image/airpods.jpg", category: "Electronics", title: "Airpods Pro 2", price: "450"},
-
 ];
-
-
-// Function to Load Listings from RestDB
-/*async function loadListings() {
-    console.log("Loading listings from JavaScript array...");
-    displayListings(listings); // Initial display
-
-}*/
 
 // Function to Display Listings
 function displayListings(filteredListings) {
     const listingsContainer = document.getElementById("featuredListings");
     listingsContainer.innerHTML = ""; // Clear existing listings
-
+    let likedListings = JSON.parse(localStorage.getItem("likedListings")) || []; // Get liked items
     filteredListings.forEach(listing => {
         // Ensure image retrieval is correct
         let imageUrl = listing.image ? listing.image : 'default.jpg';
-
+        let isLiked = likedListings.includes(listing.id) ? "❤️" : "🤍"; // Show correct like state
         const item = document.createElement("div");
         item.className = "masonry-item";
         item.innerHTML = `
@@ -45,6 +34,8 @@ function displayListings(filteredListings) {
                 <div class="card-body">
                     <h5 class="card-title">${listing.title}</h5>
                     <p class="card-text">$${listing.price}</p>
+                    <button class="btn btn-like" onclick="toggleLike(${listing.id})">${isLiked}</button>
+
                 </div>
             </div>
         `;
@@ -81,7 +72,6 @@ function filterByCategory(category) {
     const filteredListings = listings.filter(listing => listing.category.toLowerCase() === category.toLowerCase());
     displayListings(filteredListings);
 }
-
 
 // Function to Open Product Details Modal
 async function openProductDetail(productId) {
@@ -149,9 +139,7 @@ async function openProductDetail(productId) {
     }
 }
 
-
 //document.getElementById("searchInput").addEventListener("input", filterListings);
-
 async function fetchSellerInfo(sellerEmail) {
     if (!sellerEmail) {
         console.warn("No seller email found.");
@@ -189,10 +177,10 @@ async function fetchSellerInfo(sellerEmail) {
 let currentSellerName = "";
 let currentSellerEmail = "";
 
-// 📌 Open Chat Box (with Seller Name)
+// Open Chat Box (with Seller Name)
 async function startChat(sellerEmail) {
     if (!sellerEmail || sellerEmail === "Not Available") {
-        alert("❌ Seller contact not available.");
+        alert("Seller contact not available.");
         return;
     }
 
@@ -214,7 +202,7 @@ async function startChat(sellerEmail) {
             currentSellerName = sellerEmail;
         }
     } catch (error) {
-        console.error("❌ Error fetching seller name:", error);
+        console.error("Error fetching seller name:", error);
         currentSellerName = sellerEmail;
     }
 
@@ -228,13 +216,12 @@ async function startChat(sellerEmail) {
     chatBox.style.zIndex = "4000"; // Ensure it is above the modal
 }
 
-
-// 📌 Close Chat Box
+// Close Chat Box
 function closeChat() {
     document.getElementById("chatBoxContainer").style.display = "none";
 }
 
-// 📌 Send Message
+//  Send Message
 function sendMessage() {
     let chatInput = document.getElementById("chatInput");
     let message = chatInput.value.trim();
@@ -264,7 +251,7 @@ function sendMessage() {
     chatInput.value = "";
 }
 
-// 📌 Display Chat Messages
+//  Display Chat Messages
 function displayMessage(messageData, isNew = false) {
     let chatMessages = document.getElementById("chatMessages");
     let messageDiv = document.createElement("div");
@@ -278,8 +265,7 @@ function displayMessage(messageData, isNew = false) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-
-// 📌 Load Chat History
+// Load Chat History
 function loadChatMessages(sellerEmail) {
     let chatMessages = document.getElementById("chatMessages");
     chatMessages.innerHTML = "";
@@ -289,19 +275,29 @@ function loadChatMessages(sellerEmail) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    let sendButton = document.getElementById("sendMessageBtn");
     let chatInput = document.getElementById("chatInput");
 
-if (!chatInput) {
-    console.error("❌ chatInput NOT found!");
-} else {
-    console.log("✅ chatInput found!");
-    chatInput.style.pointerEvents = "auto";
-    chatInput.style.opacity = "1"; // Make sure it's visible
-    chatInput.focus(); // Try to focus it
-}
+    if (!sendButton) console.error("Send button NOT found!");
+    if (!chatInput) console.error("Chat input NOT found!");
+
+    // Attach click event
+    if (sendButton) {
+        sendButton.addEventListener("click", sendMessage);
+        console.log("Send button event attached!");
+    }
+
+    // Attach Enter key event
+    if (chatInput) {
+        chatInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        });
+        console.log("Enter key event attached!");
+    }
 
 });
-
 
 async function fetchReviews(listingId) {
     try {
@@ -316,7 +312,7 @@ async function fetchReviews(listingId) {
         if (!response.ok) throw new Error(`Failed to fetch reviews. Status: ${response.status}`);
 
         const reviews = await response.json();
-        console.log("🔍 Reviews fetched:", reviews); // Debugging line
+        console.log(" Reviews fetched:", reviews); // Debugging line
 
         const reviewList = document.getElementById("reviewList");
         reviewList.innerHTML = ""; // Clear previous reviews
@@ -326,7 +322,7 @@ async function fetchReviews(listingId) {
             return;
         }
 
-        // 🔄 Fetch buyer names and display reviews
+        // Fetch buyer names and display reviews
         for (const review of reviews) {
             console.log("Review fetched:", review); // Debugging line
             const buyerEmail = review.buyer_email;
@@ -360,8 +356,6 @@ async function fetchReviews(listingId) {
         document.getElementById("reviewList").innerHTML = "<p>Error loading reviews. Try again later.</p>";
     }
 }
-
-//<p><strong>Seller:</strong> ${review.seller_email}</p>
 
 async function submitReview() {
     let userData = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -410,7 +404,7 @@ async function submitReview() {
             createdate: new Date().toISOString()
         };
 
-        // 📡 Send review to RestDB
+        // Send review to RestDB
         let reviewResponse = await fetch("https://fedest-f892.restdb.io/rest/reviews", {
             method: "POST",
             headers: {
@@ -429,7 +423,7 @@ async function submitReview() {
 
         alert("Review submitted successfully!");
 
-        // 🔄 Refresh Reviews
+        // Refresh Reviews
         fetchReviews(listingId);
         document.getElementById("reviewText").value = ""; // Clear input
 
@@ -533,8 +527,6 @@ async function createListing() {
         alert("Failed to save listing. Please try again.");
     }
 
-
-
     // Clear form and close modal
     document.getElementById("listingTitle").value = "";
     document.getElementById("listingCategory").value = "";
@@ -585,16 +577,76 @@ function displayProfileListings() {
         profileContainer.appendChild(item);
     });
 }
+
 // Load Listings on Page Load
 document.addEventListener("DOMContentLoaded", () => {
     
     displayListings(listings);
     displayProfileListings();
 });
-/*document.addEventListener("DOMContentLoaded", () => {
-    displayProfileListings();
-});*/
 
+function toggleLike(productId) {
+    let likedListings = JSON.parse(localStorage.getItem("likedListings")) || [];
+
+    if (likedListings.includes(productId)) {
+        likedListings = likedListings.filter(id => id !== productId); // Unlike the item
+    } else {
+        likedListings.push(productId); // Like the item
+    }
+
+    localStorage.setItem("likedListings", JSON.stringify(likedListings));
+    displayListings(listings); // Refresh Listings to show updated likes
+}
+
+function displayLikedListings() {
+    let likedListings = JSON.parse(localStorage.getItem("likedListings")) || [];
+    let likedProducts = listings.filter(item => likedListings.includes(item.id));
+
+    const likedContainer = document.getElementById("likedListingsContainer");
+    likedContainer.innerHTML = ""; // Clear old listings
+
+    if (likedProducts.length === 0) {
+        likedContainer.innerHTML = "<p style='text-align: center;'>No liked listings yet.</p>";
+        return;
+    }
+
+    let row = document.createElement("div");
+    row.className = "row"; // Bootstrap row for grid layout
+
+    likedProducts.forEach(listing => {
+        let imageUrl = listing.image ? listing.image : 'default.jpg';
+
+        const item = document.createElement("div");
+        item.className = "col-md-6";  // Creates a 2-column layout
+        item.innerHTML = `
+            <div class="card masonry-item">
+                <img src="${imageUrl}" alt="${listing.title}" class="card-img-top">
+                <div class="card-body">
+                    <h5 class="card-title">${listing.title}</h5>
+                    <p class="card-text">$${listing.price}</p>
+                    <button class="btn btn-darkblue view-button" data-id="${listing.id}">View</button>
+                </div>
+            </div>
+        `;
+        row.appendChild(item);
+    });
+
+    likedContainer.appendChild(row);
+
+    //Fix Event Listener Issue
+    likedContainer.addEventListener("click", function(event) {
+        if (event.target.classList.contains("view-button")) {
+            let productId = event.target.getAttribute("data-id");
+            if (productId) {
+                openProductDetail(productId);
+            }
+        }
+    });
+
+    //Show modal
+    let likedListingsModal = new bootstrap.Modal(document.getElementById("likedListingsModal"));
+    likedListingsModal.show();
+}
 
 
 

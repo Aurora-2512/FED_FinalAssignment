@@ -8,8 +8,9 @@
 
 </head>
 <body>
+    
     <!-- Navbar -->
-     <div id="navbar"></div>
+    <div id="navbar"></div>
 
     <!-- Search Section -->
     <div class="container mt-4">
@@ -39,37 +40,66 @@
 
     <!-- Footer -->
     <div id="footer"></div>
+
+    <!--productModal-->
     <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-              <div class="modal-header">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
                   <h5 class="modal-title" id="modalTitle">Product Title</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                  <div class="row">
-                      <!-- Left side: Image -->
-                      <div class="col-md-6">
-                          <img id="modalImage" src="" alt="Product Image" class="img-fluid rounded">
-                      </div>
-                      <!-- Right side: Details -->
-                      <div class="col-md-6">
-                          <p><strong>Category:</strong> <span id="modalCategory"></span></p>
-                          <p><strong>Size:</strong> <span id="modalSize"></span></p>
-                          <p><strong>Price:</strong> $<span id="modalPrice"></span></p>
-                          <p><strong>Type:</strong> <span id="modalType"></span></p>
-                          <p><strong>Condition:</strong> <span id="modalCondition"></span></p>
-                          <p><strong>Seller Info:</strong> <span id="modalSeller"></span></p>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
-  </div>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img id="modalImage" src="" alt="Product Image" class="img-fluid rounded">
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Category:</strong> <span id="modalCategory"></span></p>
+                            <p><strong>Size:</strong> <span id="modalSize"></span></p>
+                            <p><strong>Price:</strong> <span id="modalPrice"></span></p>
+                            <p><strong>Type:</strong> <span id="modalType"></span></p>
+                            <p><strong>Condition:</strong> <span id="modalCondition"></span></p> 
+                            <div id="sellerInfo">
+                                <h5>Seller Information</h5>
+                                <p><strong>Name:</strong> <span id="sellerName">Loading...</span></p>
+                                <p><strong>Contact:</strong> <span id="sellerContact">Loading...</span></p>
+                                <button class="btn btn-darkblue" id="chatSeller">Chat with Seller</button>
+                            </div>
+                            <input type="hidden" id="modalListingId">
+                            <input type="hidden" id="sellerEmail">
+                            <div id="reviewSection">
+                                <h5>Reviews</h5>
+                                <div id="reviewList"></div>
+                                <h6>Add a Review</h6>
+                                <textarea id="reviewText" class="form-control" placeholder="Write a review..."></textarea>
+                                <button class="btn btn-darkblue mt-2" onclick="submitReview()">Submit Review</button>
+                            </div>    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
       
+    <!-- Chat Modal -->
+    <div id="chatBoxContainer" class="chat-box-container">
+    <div class="chat-box-header">
+        <span id="chatSellerName">Chat with Seller</span>
+        <button onclick="closeChat()" class="close-chat">✖</button>
+    </div>
+    <div id="chatMessages" class="chat-messages"></div>
+    <div class="chat-input-container">
+        <input type="text" id="chatInput" placeholder="Type a message...">
+        <button id="sendMessageBtn">Send</button>
+    </div>
+    </div>
+    
+
+    <script src="js/scripts.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/navbar.js"></script>
-    <script src="js/scripts.js"></script>
+
        
 </body>
 </html>

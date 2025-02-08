@@ -18,7 +18,9 @@
             <button class="btn btn-darkblue" onclick="openEditModal()">Edit Profile</button>
             <button class="btn btn-darkblue" onclick="openUploadProfileModal()">Upload Profile Picture</button>
             <button class="btn btn-darkblue" onclick="openCreateListingModal()">Create Listing</button>
+            <button class="btn btn-darkblue" onclick="displayLikedListings()">Liked Listings</button>
             <button class="btn btn-danger" onclick="logoutUser()">Logout</button>
+            <button class="btn btn-danger" onclick="confirmDeleteAccount()">Delete Account</button>
         </div>
 
         <main class="profile-main">
@@ -43,20 +45,20 @@
     
                     
                         <label for="editName">New Name:</label>
-                        <input type="text" id="editName" class="form-control mb-2" placeholder="Enter new name">
+                        <input type="text" id="editName" class="form-control mb-2" >
                         
                         <label for="editPassword">New Password:</label>
-                        <input type="password" id="editPassword" class="form-control mb-2" placeholder="Enter new password">
+                        <input type="password" id="editPassword" class="form-control mb-2" >
                         
                         <label for="editConfirmPassword">Confirm Password:</label>
-                        <input type="password" id="editConfirmPassword" class="form-control mb-2" placeholder="Confirm new password">
+                        <input type="password" id="editConfirmPassword" class="form-control mb-2" >
                         
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" onclick="updateProfile()">Save Changes</button>
+                        <button type="button" class="btn btn-darkblue" onclick="updateProfile()">Save Changes</button>
                     </div>
-                </div>
+                </div> 
             </div>
         </div>
     </div>
@@ -71,7 +73,7 @@
                 </div>
                 <div class="modal-body">
                     <input type="file" id="uploadProfileImage" class="form-control mb-2">
-                    <button class="btn btn-primary" onclick="saveProfilePicture()">Upload</button>
+                    <button class="btn btn-darkblue" onclick="saveProfilePicture()">Upload</button>
                 </div>
             </div>
         </div>
@@ -96,7 +98,42 @@
                                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="createListing()">Save Listing</button>
+                    <button type="button" class="btn btn-darkblue" onclick="createListing()">Save Listing</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liked Listings Modal -->
+    <div class="modal fade" id="likedListingsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Liked Listings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="likedListingsContainer" class="liked-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Details Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Product Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <img id="modalImage" src="default.jpg" class="img-fluid mb-3">
+                    <p><strong>Category:</strong> <span id="modalCategory">N/A</span></p>
+                    <p><strong>Price:</strong> <span id="modalPrice">$0.00</span></p>
+                    <p><strong>Type:</strong> <span id="modalType">N/A</span></p>
+                    <p><strong>Condition:</strong> <span id="modalCondition">N/A</span></p>
+                    <p><strong>Seller Email:</strong> <span id="sellerEmail">N/A</span></p>
                 </div>
             </div>
         </div>
