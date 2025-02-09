@@ -388,6 +388,21 @@ body{
     width: 100%; /* Ensures proper ellipsis */
 }
 
+.lottie-container {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100vh; /* Full screen height */
+    width: 100%;
+}
+
+/* Ensure Lottie animation is contained properly */
+dotlottie-player {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+}
+
 /* Responsive Fix */
 @media (max-width: 600px) {
     #likedListingsContainer {

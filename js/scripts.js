@@ -1,4 +1,6 @@
-const APIKEY = "6793aa081128e046e96abe67";
+const APIKEY = "6793aa081128e046e96abe67"; 
+
+// Initial List of Sample Listings
 let listings = [
     { id:1,image: "image/smartphone.jpeg", category: "Electronics", title: "Samsung Galaxy A52", price: "250" },
     { id:2,image: "image/dji_osmo_pocket.jpg", category: "Electronics", title: "Pocket Camera", price: "150" },
@@ -58,7 +60,7 @@ function sortListings(criteria, order) {
     displayListings(sortedListings);
 }
 
-// Function to Filter Listings
+// Function to Filter Listings based on search Query
 function filterListings() {
     const query = document.getElementById("searchInput").value.toLowerCase();
     const filteredListings = listings.filter(listing => 
@@ -585,6 +587,7 @@ document.addEventListener("DOMContentLoaded", () => {
     displayProfileListings();
 });
 
+//Function to like and unlike a listing
 function toggleLike(productId) {
     let likedListings = JSON.parse(localStorage.getItem("likedListings")) || [];
 
@@ -598,6 +601,7 @@ function toggleLike(productId) {
     displayListings(listings); // Refresh Listings to show updated likes
 }
 
+//function to Display liked listings
 function displayLikedListings() {
     let likedListings = JSON.parse(localStorage.getItem("likedListings")) || [];
     let likedProducts = listings.filter(item => likedListings.includes(item.id));
