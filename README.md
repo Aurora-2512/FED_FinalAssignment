@@ -1,4 +1,7 @@
 # FED_FinalAssignment
+Role
+Ei Shin Thant --> All Javascript,API , some HTML with testing 
+Akshaya --> Mainly HTML
 
 # User Audience, Intent and Purpose
 
